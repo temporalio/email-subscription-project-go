@@ -12,7 +12,9 @@ Temporal promises to help you build long-lasting apps. With this example, you'll
 Once this is working, follow the directions provided.
 
 1. Launch an instance of Temporal Cloud (can be done on terminal or through a container such as Docker).
-2. Enter `go run worker/main.go` into a new terminal window.
-3. Open another terminal and enter `go run start/main.go`
+2. Enter `go run gateway/main.go` into a new terminal window.
+3. Open another terminal and enter `go run worker/main.go`
 
 If successful, you should see output for a mock welcome email.
+
+If nothing happens, please let me know. o.O
