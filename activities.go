@@ -9,7 +9,7 @@ import (
 	"go.temporal.io/sdk/activity"
 )
 
-// email activity
+// email activities
 func SendContentEmail(ctx context.Context, emailInfo EmailInfo) error {
 	logger := activity.GetLogger(ctx)
 	logger.Info("Sending email " + emailInfo.Mail + " to " + emailInfo.EmailAddress)
