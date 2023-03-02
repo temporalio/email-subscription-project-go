@@ -19,10 +19,10 @@ func main() {
 	}
 	defer c.Close()
 
-	w := worker.New(c, "SUBSCRIPTION_TASK_QUEUE", worker.Options{})
+	w := worker.New(c, "subscription_emails", worker.Options{})
 	// register Activity and Workflow
-	w.RegisterActivity(subscribe_emails.SendContentEmail)
 	w.RegisterWorkflow(subscribe_emails.SubscriptionWorkflow)
+	w.RegisterActivity(&subscribe_emails.Activities{})
 
 	// Listen to Task Queue
 	err = w.Run(worker.InterruptCh())
