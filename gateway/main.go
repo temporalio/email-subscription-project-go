@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"subscribe_emails"
 
 	"go.temporal.io/sdk/client"
 )
@@ -16,18 +19,86 @@ func indexHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func subscribeHandler(w http.ResponseWriter, r *http.Request) {
-	// compose email
+	err := r.ParseForm()
+	if err != nil {
+		// in case of any error
+		_, _ = fmt.Fprint(w, "<h1>Error processing form</h1>")
+		return
+	}
 
+	email := r.PostForm.Get("email")
 
-	// define subscription
+	if email == "" {
+		// in case of any error
+		_, _ = fmt.Fprint(w, "<h1>Email is blank</h1>")
+		return
+	}
 
+	// use the email as the id in the workflow. This may leak PII.
+	workflowOptions := client.StartWorkflowOptions{
+		ID:        "email_drip_" + email,
+		TaskQueue: taskQueueName,
+	}
 
-	// execute Workflow to start subsciption
+	// Define the subscription
+	subscription := subscribe_emails.Subscription{
+		EmailInfo: subscribe_emails.EmailInfo{
+			EmailAddress: email,
+		},
+
+	}
+
+	// execute the Temporal Workflow to start the subscription.
+	_, err = temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, subscribe_emails.SubscriptionWorkflow, subscription)
+
+	if err != nil {
+		_, _ = fmt.Fprint(w, "<h1>Couldn't sign up</h1>")
+		log.Print(err)
+	} else {
+		_, _ = fmt.Fprint(w, "<h1>Signed up!</h1>")
+	}
 
 }
 
 func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
+	
+	switch r.Method {
 
+	case "GET":
+
+		// http.ServeFile(w, r, "form.html")
+		_, _ = fmt.Fprint(w, "<h1>Unsubscribe</h1><form method='post' action='unsubscribe'><input required name='email' type='email'><input type='submit' value='Unsubscribe'>")
+
+	case "POST":
+
+		err := r.ParseForm()
+
+		if err != nil {
+			// in case of any error
+			_, _ = fmt.Fprint(w, "<h1>Error processing form</h1>")
+			return
+		}
+
+		email := r.PostForm.Get("email")
+
+		if email == "" {
+			// in case of any error
+			_, _ = fmt.Fprint(w, "<h1>Email is blank</h1>")
+			return
+		}
+
+		workflowID := "subscribe_email_" + email
+
+		err = temporalClient.CancelWorkflow(context.Background(), workflowID, "")
+
+		if err != nil {
+			_, _ = fmt.Fprint(w, "<h1>Couldn't unsubscribe you</h1>")
+			log.Fatalln("Unable to cancel Workflow Execution", err)
+		} else {
+			_, _ = fmt.Fprint(w, "<h1>Unsubscribed you from our emails. Sorry to see you go.</h1>")
+			log.Println("Workflow Execution cancelled", "WorkflowID", workflowID)
+		}
+	}
 
 }
 
