@@ -13,7 +13,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	billingPeriodNum := 0
 
 // How frequently to send the messages
-duration := time.Minute
+duration := 10 * time.Second
 
 ao := workflow.ActivityOptions{
 	StartToCloseTimeout: 10 * time.Minute,
@@ -66,7 +66,7 @@ logger.Info("Sending welcome email to " + subscription.EmailInfo.EmailAddress)
 	}
 
 	// start subscription period
-	for (billingPeriodNum < subscription.Periods.MaxBillingPeriods) {
+	for (billingPeriodNum < 10) {
 
 		data := EmailInfo{
 			EmailAddress: subscription.EmailInfo.EmailAddress,
