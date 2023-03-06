@@ -66,20 +66,20 @@ logger.Info("Sending welcome email to " + subscription.EmailInfo.EmailAddress)
 	}
 
 	// start subscription period
-	for _, mail := billingPeriodNum < subscription.Periods.MaxBillingPeriods {
+	for (billingPeriodNum < subscription.Periods.MaxBillingPeriods) {
 
 		data := EmailInfo{
-			EmailAddress: subscription.EmailAddress,
-			Mail:         mail,
+			EmailAddress: subscription.EmailInfo.EmailAddress,
+			Mail:         "This is yet another email in the Subscription Workflow.",
 		}
 
-		err = workflow.ExecuteActivity(ctx, SendContentEmail, data).Get(ctx, nil)
+		err = workflow.ExecuteActivity(ctx, activities.SendSubscriptionEmail, data).Get(ctx, nil)
 
 		if err != nil {
-			logger.Error("Failed to send email "+mail, "Error", err)
+			logger.Error("Failed to send email ", "Error", err)
 		}
 
-		logger.Info("sent content email " + mail + " to " + subscription.EmailAddress)
+		logger.Info("sent content email to " + subscription.EmailInfo.EmailAddress)
 
 		billingPeriodNum++
 
