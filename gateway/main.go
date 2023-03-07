@@ -36,7 +36,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// use the email as the id in the workflow. This may leak PII.
 	workflowOptions := client.StartWorkflowOptions{
-		ID:        "email_drip_" + email,
+		ID:        "email_subscription_" + email,
 		TaskQueue: taskQueueName,
 	}
 

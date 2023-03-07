@@ -1,1 +1,0 @@
-Welcome! you've been signed up!

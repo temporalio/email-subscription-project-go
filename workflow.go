@@ -13,7 +13,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	billingPeriodNum := 0
 
 // How frequently to send the messages
-duration := 10 * time.Second
+duration := time.Second
 
 ao := workflow.ActivityOptions{
 	StartToCloseTimeout: 10 * time.Minute,
@@ -37,9 +37,12 @@ defer func() {
 
 	newCtx, _ := workflow.NewDisconnectedContext(ctx)
 
-	data := EmailInfo{
-		EmailAddress: subscription.EmailInfo.EmailAddress,
-		Mail: "You have been unsubscribed from the Subscription Workflow. Good bye.",
+	data := Subscription {
+		EmailInfo: EmailInfo {
+			EmailAddress: subscription.EmailInfo.EmailAddress,
+			Mail: "You have been unsubscribed from the Subscription Workflow. Good bye.",
+		},
+
 	}
 
 	logger.Info("Sending unsubscribe email to " + subscription.EmailInfo.EmailAddress)
@@ -52,9 +55,17 @@ defer func() {
 
 logger.Info("Sending welcome email to " + subscription.EmailInfo.EmailAddress)
 
-	data := EmailInfo{
-		EmailAddress: subscription.EmailInfo.EmailAddress,
-		Mail:         "Welcome! you've been signed up!",
+	data := Subscription { 
+		EmailInfo: EmailInfo {
+			EmailAddress: subscription.EmailInfo.EmailAddress,
+			Mail:         "Welcome! you've been signed up!",
+		},
+		Periods: Periods {
+			TrialPeriod: 10 * duration,
+			BillingPeriod: 10 * duration,
+			MaxBillingPeriods: 10,
+			BillingPeriodCharge: 10,
+		},
 	}
 
 	err := workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
@@ -66,7 +77,7 @@ logger.Info("Sending welcome email to " + subscription.EmailInfo.EmailAddress)
 	}
 
 	// start subscription period
-	for (billingPeriodNum < 10) {
+	for (billingPeriodNum < data.Periods.MaxBillingPeriods) {
 
 		data := EmailInfo{
 			EmailAddress: subscription.EmailInfo.EmailAddress,
