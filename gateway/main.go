@@ -44,8 +44,8 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 	subscription := subscribe_emails.Subscription{
 		EmailInfo: subscribe_emails.EmailInfo{
 			EmailAddress: email,
+			Mail: "",
 		},
-
 	}
 
 	// execute the Temporal Workflow to start the subscription.
@@ -127,9 +127,5 @@ func main() {
 	http.HandleFunc("/subscribe", subscribeHandler)
 	http.HandleFunc("/unsubscribe", unsubscribeHandler)
 	http.HandleFunc("/getdetails", getDetailsHandler)
-
-	e := http.ListenAndServe(":"+port, nil)
-	if e != nil {
-		http.ListenAndServe(":"+port, nil)
-	}
+	_ = http.ListenAndServe(":"+port, nil)
 }
