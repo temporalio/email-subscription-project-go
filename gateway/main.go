@@ -36,7 +36,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// use the email as the id in the workflow. This may leak PII.
 	workflowOptions := client.StartWorkflowOptions{
-		ID:        "email_subscription_" + email,
+		ID:        "subscribe_email_" + email,
 		TaskQueue: taskQueueName,
 	}
 
@@ -45,6 +45,10 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 		EmailInfo: subscribe_emails.EmailInfo{
 			EmailAddress: email,
 			Mail: "",
+		},
+		Periods: subscribe_emails.Periods{
+			MaxBillingPeriods: 10,
+
 		},
 	}
 
@@ -67,7 +71,7 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 
 		// http.ServeFile(w, r, "form.html")
-		_, _ = fmt.Fprint(w, "<h1>Unsubscribe</h1><form method='post' action='unsubscribe'><input required name='email' type='email'><input type='submit' value='Unsubscribe'>")
+		_, _ = fmt.Fprint(w, "<h1>Unsubscribe</h1><form method='post' action='/unsubscribe'><input required name='email' type='email'><input type='submit' value='Unsubscribe'>")
 
 	case "POST":
 
@@ -105,7 +109,7 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Your details have been retrieved.")
 	// create query
-	// respond in email with results
+	// respond in southwe
 }
 
 func main() {
