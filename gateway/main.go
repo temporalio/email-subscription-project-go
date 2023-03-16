@@ -47,8 +47,8 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 			Mail: "",
 		},
 		Periods: subscribe_emails.Periods{
-			MaxBillingPeriods: 10,
-
+			MaxBillingPeriods: 30,
+			BillingPeriodCharge: 10,
 		},
 	}
 
@@ -107,9 +107,17 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		// http.ServeFile(w, r, "form.html")
+		_, _ = fmt.Fprint(w, "<h1>Get subscription details</h1><form method='post' action='/getdetails'><input required name='email' type='email'><input type='submit' value='GetDetails'>")
+	
+	case "POST":
+		// print email, billing period, charge, etc.
+	}
+	
 	fmt.Fprint(w, "Your details have been retrieved.")
-	// create query
-	// respond in southwe
+	
 }
 
 func main() {
