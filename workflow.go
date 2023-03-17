@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -17,6 +18,8 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	logger := workflow.GetLogger(ctx)
 	logger.Info("Subscription created for " + subscription.EmailInfo.EmailAddress)
 
+	var err error
+
 	ao := workflow.ActivityOptions{
 		StartToCloseTimeout: 10 * time.Minute,
 		WaitForCancellation: true,
@@ -27,9 +30,22 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	// Handle any cleanup, including cancellations.
 	defer func() {
 		if !errors.Is(ctx.Err(), workflow.ErrCanceled) {
+			err = temporal.NewCanceledError()
+
+			data := EmailInfo {
+				EmailAddress: subscription.EmailInfo.EmailAddress,
+				Mail:         "Welcome! Looks like you've been signed up!",
+			}
+			e := workflow.ExecuteActivity(ctx, activities.SendCancellationEmailDuringActiveSubscription, data)
+
+			if err != nil {
+				logger.Error("Failed to send cancel email", "Error", e)
+			} else {
+				// Cancellation received, which will trigger an unsubscribe email.
+				logger.Info("Sending cancellation email")
+			}
 			return
 		}
-		// Cancellation received, which will trigger an unsubscribe email.
 
 		newCtx, _ := workflow.NewDisconnectedContext(ctx)
 
@@ -54,7 +70,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		}
 			
 
-	err := workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
+	err = workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
 
 	if err != nil {
 		logger.Error("Failed to send welcome email", "Error", err)
@@ -89,6 +105,6 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		workflow.Sleep(ctx, duration)
 	}
 
-	return nil
+	return err
 }
 
