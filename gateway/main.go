@@ -148,9 +148,6 @@ func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Received query result", "Result", result)
 		fmt.Fprint(w, "Your details have been retrieved.")
 	}
-	
-	
-	
 }
 
 func main() {
