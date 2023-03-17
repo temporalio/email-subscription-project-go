@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -113,10 +114,42 @@ func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprint(w, "<h1>Get subscription details</h1><form method='post' action='/getdetails'><input required name='email' type='email'><input type='submit' value='GetDetails'>")
 	
 	case "POST":
+
+		err := r.ParseForm()
+
+		if err != nil {
+			// in case of any error
+			_, _ = fmt.Fprint(w, "<h1>Error processing form</h1>")
+			return
+		}
+
+		email := r.PostForm.Get("email")
+
+		if email == "" {
+			// in case of any error
+			_, _ = fmt.Fprint(w, "<h1>Email is blank</h1>")
+			return
+		}
+		
+		var workflowID, queryType string
+		flag.StringVar(&workflowID, "w", "subscribe_email_" + email, "WorkflowID.")
+		flag.StringVar(&queryType, "t", "state", "Query type [state|__stack_trace].")
+		flag.Parse()
+
 		// print email, billing period, charge, etc.
+		resp, err := temporalClient.QueryWorkflow(context.Background(), workflowID, "", queryType)
+		if err != nil {
+			log.Fatalln("Unable to query workflow", err)
+		}
+		var result interface{}
+		if err := resp.Get(&result); err != nil {
+			log.Fatalln("Unable to decode query result", err)
+		}
+		log.Println("Received query result", "Result", result)
+		fmt.Fprint(w, "Your details have been retrieved.")
 	}
 	
-	fmt.Fprint(w, "Your details have been retrieved.")
+	
 	
 }
 

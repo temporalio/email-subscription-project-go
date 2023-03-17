@@ -29,7 +29,6 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		if !errors.Is(ctx.Err(), workflow.ErrCanceled) {
 			return
 		}
-
 		// Cancellation received, which will trigger an unsubscribe email.
 
 		newCtx, _ := workflow.NewDisconnectedContext(ctx)
