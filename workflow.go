@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -30,8 +29,6 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	// Handle any cleanup, including cancellations.
 	defer func() {
 		if !errors.Is(ctx.Err(), workflow.ErrCanceled) {
-			err = temporal.NewCanceledError()
-
 			data := EmailInfo {
 				EmailAddress: subscription.EmailInfo.EmailAddress,
 				Mail:         "Welcome! Looks like you've been signed up!",
