@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -130,12 +129,10 @@ func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			_, _ = fmt.Fprint(w, "<h1>Email is blank</h1>")
 			return
 		}
-		
-		var workflowID, queryType string
-		flag.StringVar(&workflowID, "w", "subscribe_email_" + email, "WorkflowID.")
-		flag.StringVar(&queryType, "t", "state", "Query type [state|__stack_trace].")
-		flag.Parse()
 
+		workflowID := "subscribe_email_" + email
+		queryType := "getDetails"
+		
 		// print email, billing period, charge, etc.
 		resp, err := temporalClient.QueryWorkflow(context.Background(), workflowID, "", queryType)
 		if err != nil {

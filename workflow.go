@@ -2,6 +2,7 @@ package subscribe_emails
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"go.temporal.io/sdk/workflow"
@@ -16,6 +17,14 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 
 	logger := workflow.GetLogger(ctx)
 	logger.Info("Subscription created for " + subscription.EmailInfo.EmailAddress)
+
+	e := workflow.SetQueryHandler(ctx, "getDetails", func(input []byte) (string, error) {
+ 		return "Details: " + subscription.EmailInfo.EmailAddress + ", " + "Charged " + fmt.Sprint(subscription.Periods.BillingPeriodCharge), nil
+	})
+	if e != nil {
+		logger.Info("SetQueryHandler failed: " + e.Error())
+		return e 
+	}
 
 	var err error
 
