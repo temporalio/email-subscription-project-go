@@ -2,6 +2,7 @@ package subscribe_emails
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"go.temporal.io/sdk/workflow"
@@ -20,6 +21,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	var queryResult string
 
 	e := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
+		queryResult = subscription.EmailInfo.EmailAddress + " has been charged " + strconv.Itoa(subscription.Periods.BillingPeriodCharge)
  		return queryResult, nil
 	})
 	if e != nil {

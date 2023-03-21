@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"subscribe_emails"
 
 	"go.temporal.io/sdk/client"
@@ -107,16 +108,35 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
-
-	// http.ServeFile(w, r, "form.html")
 	_, _ = fmt.Fprint(w, "<h1>Get description details here!</h1>")
 	_, _ = fmt.Fprint(w, "<form method='get' action='/details'><input required name='email' type='email'><input type='submit' value='GetDetails'>")
-	
 }
 
 func showDetailsHandler(w http.ResponseWriter, r *http.Request) {
-	_, _ = fmt.Fprint(w, "<h1>Your details:</h1>")
-	_, _ = fmt.Fprint(w, "<p>"+"test"+"</p>")
+	// Parse the query string
+	queryValues, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+	 	log.Println("Failed to query Workflow.")
+		return 
+	}
+   
+	// Extract the email parameter
+	email := queryValues.Get("email")
+
+	workflowID := "subscribe_email_" + email
+	queryType := "GetDetails"
+	
+	// print email, billing period, charge, etc.
+	resp, err := temporalClient.QueryWorkflow(context.Background(), workflowID, "", queryType)
+	if err != nil {
+		log.Fatalln("Unable to query workflow", err)
+	}
+	var result string
+	if err := resp.Get(&result); err != nil {
+		log.Fatalln("Unable to decode query result", err)
+	}
+	log.Println("Received query result", "Result: " + result)
+	fmt.Fprint(w, "Your details have been retrieved. Results: " + result)
 }
 
 func main() {
