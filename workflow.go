@@ -1,3 +1,4 @@
+// @@@SNIPSTART subscription-workflow-go-workflow
 package subscribe_emails
 
 import (
@@ -116,4 +117,5 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 
 	return err
 }
+// @@@SNIPEND
 

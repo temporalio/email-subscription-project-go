@@ -1,3 +1,4 @@
+// @@@SNIPSTART subscription-workflow-go-worker
 package main
 
 import (
@@ -31,3 +32,4 @@ func main() {
 	}
 	log.Println("Worker successfully started.")
 }
+// @@@SNIPEND

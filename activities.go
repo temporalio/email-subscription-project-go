@@ -1,3 +1,4 @@
+// @@@SNIPSTART subscription-workflow-go-activities
 package subscribe_emails
 
 import (
@@ -39,3 +40,4 @@ func (a *Activities) SendSubscriptionEmail(ctx context.Context, emailInfo EmailI
 	activity.GetLogger(ctx).Info("sending subscription email to: ", emailInfo.EmailAddress)
 	return "Sending subscription email completed for: " + emailInfo.EmailAddress, nil
 }
+// @@@SNIPEND

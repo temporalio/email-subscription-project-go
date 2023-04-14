@@ -1,3 +1,4 @@
+// @@@SNIPSTART subscription-workflow-go-subscribe
 package subscribe_emails
 
 import "time"
@@ -21,3 +22,4 @@ type Subscription struct {
 	EmailInfo    EmailInfo
 	Periods      Periods
 }
+// @@@SNIPEND

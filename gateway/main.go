@@ -1,3 +1,4 @@
+// @@@SNIPSTART subscription-workflow-go-gateway
 package main
 
 import (
@@ -161,3 +162,4 @@ func main() {
 	http.HandleFunc("/details", showDetailsHandler)
 	_ = http.ListenAndServe(":"+port, nil)
 }
+// @@@SNIPEND
