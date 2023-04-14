@@ -19,7 +19,7 @@ func main() {
 		log.Fatalln("Unable to create Temporal Client.", err)
 	}
 	defer c.Close()
-
+	// create Worker
 	w := worker.New(c, "subscription_emails", worker.Options{})
 	// register Activity and Workflow
 	w.RegisterWorkflow(subscribe_emails.SubscriptionWorkflow)

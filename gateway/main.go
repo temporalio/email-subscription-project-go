@@ -15,11 +15,13 @@ import (
 var temporalClient client.Client
 var taskQueueName string
 
+// create the index handler, accessed at localhost:8080
 func indexHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprint(w, "<h1>Sign up here!")
 	_, _ = fmt.Fprint(w, "<form method='post' action='subscribe'><input required name='email' type='email'><input type='submit' value='Subscribe'>")
 }
 
+// create subscribe handler, which collects the email in the index handler form
 func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -27,7 +29,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprint(w, "<h1>Error processing form</h1>")
 		return
 	}
-
+	// check for valid email value
 	email := r.PostForm.Get("email")
 
 	if email == "" {
@@ -36,7 +38,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// use the email as the id in the workflow. This may leak PII.
+	// use the email as the id in the workflow.
 	workflowOptions := client.StartWorkflowOptions{
 		ID:        "subscribe_email_" + email,
 		TaskQueue: taskQueueName,
@@ -49,12 +51,12 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 			Mail: "",
 		},
 		Periods: subscribe_emails.Periods{
-			MaxBillingPeriods: 30,
+			MaxBillingPeriods: 12,
 			BillingPeriodCharge: 10,
 		},
 	}
 
-	// execute the Temporal Workflow to start the subscription.
+	// Execute the Temporal Workflow to start the subscription.
 	_, err = temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, subscribe_emails.SubscriptionWorkflow, subscription)
 
 	if err != nil {
@@ -66,17 +68,18 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// create unsubscribe handler, accessed at localhost:8080/unsubscribe
 func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 	
 	switch r.Method {
 
 	case "GET":
-
+		// create input field for the email
 		// http.ServeFile(w, r, "form.html")
 		_, _ = fmt.Fprint(w, "<h1>Unsubscribe</h1><form method='post' action='/unsubscribe'><input required name='email' type='email'><input type='submit' value='Unsubscribe'>")
 
 	case "POST":
-
+		// check value in input field
 		err := r.ParseForm()
 
 		if err != nil {
@@ -92,9 +95,9 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 			_, _ = fmt.Fprint(w, "<h1>Email is blank</h1>")
 			return
 		}
-
+		// get Workflow ID to unsubscribe
 		workflowID := "subscribe_email_" + email
-
+		// cancel the Workflow Execution
 		err = temporalClient.CancelWorkflow(context.Background(), workflowID, "")
 
 		if err != nil {
@@ -108,11 +111,13 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// create part of the Query handler, accessed at localhost:8080/getdetails
 func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, "<h1>Get description details here!</h1>")
 	_, _ = fmt.Fprint(w, "<form method='get' action='/details'><input required name='email' type='email'><input type='submit' value='GetDetails'>")
 }
 
+// create part of the Query handler that returns information at localhost:8080/details
 func showDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the query string
 	queryValues, err := url.ParseQuery(r.URL.RawQuery)
@@ -139,7 +144,7 @@ func showDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received query result", "Result: " + result)
 	fmt.Fprint(w, "Your details have been retrieved. Results: " + result)
 }
-
+// set up handlers, Client, port, Task Queue name.
 func main() {
 	port := "4000"
 	taskQueueName = "subscription_emails"

@@ -16,11 +16,6 @@ func (a *Activities) SendWelcomeEmail(ctx context.Context, emailInfo EmailInfo) 
 	return "Sending welcome email completed for " + emailInfo.EmailAddress, nil
 }
 
-func (a *Activities) SendCancellationEmailDuringTrialPeriod(ctx context.Context, subscription Subscription) (string, error) {
-	activity.GetLogger(ctx).Info("sending cancellation email during trial period to: ", subscription.EmailInfo.EmailAddress)
-	return "Sending cancellation email during trial period completed for " + subscription.EmailInfo.EmailAddress, nil
-}
-
 func (a *Activities) ChargeCustomerForBillingPeriod(ctx context.Context, emailInfo EmailInfo) (string, error) {
 	activity.GetLogger(ctx).Info("charging customer for billing period.")
 	return "Charging for billing period completed for: " + emailInfo.EmailAddress, nil
