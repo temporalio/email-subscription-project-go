@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
 )
 
@@ -20,11 +21,15 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 			TrialPeriod: time.Second,
 			BillingPeriod: time.Second,
 			MaxBillingPeriods: 12,
-			BillingPeriodCharge: 10,
 		},
 	}
 
 	// Mock Activities
+	
+	// Execute Workflow
+	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
+	require.True(t, env.IsWorkflowCompleted())
+	require.NoError(t, env.GetWorkflowError())
 }
 
 func Test_CanceledSubscriptionWorkflow (t *testing.T) {
@@ -40,9 +45,12 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 			TrialPeriod: time.Second,
 			BillingPeriod: time.Second,
 			MaxBillingPeriods: 12,
-			BillingPeriodCharge: 10,
 		},
 	}
+
+	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
+	require.True(t, env.IsWorkflowCompleted())
+	require.Error(t, env.GetWorkflowError())
 }
 
 func Test_FailedSubscriptionWorkflow (t *testing.T) {

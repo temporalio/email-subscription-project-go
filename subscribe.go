@@ -14,7 +14,6 @@ type Periods struct {
 	TrialPeriod  time.Duration
 	BillingPeriod time.Duration
 	MaxBillingPeriods int
-	BillingPeriodCharge int
 }
 
 // Subscription is the user email and the campaign they'll receive.

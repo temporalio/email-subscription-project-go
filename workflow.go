@@ -23,7 +23,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	var queryResult string
 	// Query handler
 	e := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
-		queryResult = subscription.EmailInfo.EmailAddress + " has been charged " + strconv.Itoa(subscription.Periods.BillingPeriodCharge)
+		queryResult = subscription.EmailInfo.EmailAddress + " is on billing period " + strconv.Itoa(billingPeriodNum) + " out of " + strconv.Itoa(subscription.Periods.MaxBillingPeriods)
  		return queryResult, nil
 	})
 	if e != nil {

@@ -52,7 +52,6 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 		},
 		Periods: subscribe_emails.Periods{
 			MaxBillingPeriods: 12,
-			BillingPeriodCharge: 10,
 		},
 	}
 
