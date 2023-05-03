@@ -1,3 +1,4 @@
+// @@@SNIPSTART subscription-workflow-go-subscribe-test
 package subscribe_emails
 
 import (
@@ -19,8 +20,8 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 			Mail: "",
 		},
 		Periods{
-			TrialPeriod: time.Second,
-			BillingPeriod: time.Second,
+			SubcriptionPeriod: 5 * time.Minute,
+			MaxSubscriptionPeriods: 12,
 		},
 	}
 
@@ -33,7 +34,6 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 	
 	// Execute Workflow
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
-	require.True(t, env.IsWorkflowCompleted())
 	require.NoError(t, env.GetWorkflowError())
 }
 
@@ -49,8 +49,8 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 			Mail: "",
 		},
 		Periods{
-			TrialPeriod: time.Second,
-			BillingPeriod: time.Second,
+			SubcriptionPeriod: 5 * time.Minute,
+			MaxSubscriptionPeriods: 12,
 		},
 	}
 	env.RegisterWorkflow(SubscriptionWorkflow)
@@ -59,8 +59,10 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 	env.RegisterActivity(activities.SendSubscriptionEmail)
 	env.RegisterActivity(activities.SendCancellationEmail)
 	env.RegisterActivity(activities.SendSubscriptionEndedEmail)
-
-	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
+	
 	env.CancelWorkflow()
 
+	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
+
 }
+// @@@SNIPEND

@@ -13,7 +13,7 @@ import (
 func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error {
 	// declare variables, duration, and logger
 	var activities *Activities
-	billingPeriodNum := 0
+	subscriptionPeriodNum := 0
 	// duration can be set up to a month.
 	duration := time.Minute
 
@@ -23,7 +23,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	var queryResult string
 	// Query handler
 	e := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
-		queryResult = subscription.EmailInfo.EmailAddress + " is on billing period " + strconv.Itoa(billingPeriodNum) + " out of " + strconv.Itoa(subscription.Periods.MaxBillingPeriods)
+		queryResult = subscription.EmailInfo.EmailAddress + " is on billing period " + strconv.Itoa(subscriptionPeriodNum) + " out of " + strconv.Itoa(subscription.Periods.MaxSubscriptionPeriods)
  		return queryResult, nil
 	})
 	if e != nil {
@@ -87,11 +87,11 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	if err != nil {
 		logger.Error("Failed to send welcome email", "Error", err)
 	} else {
-		billingPeriodNum++
+		subscriptionPeriodNum++
 	}
 
 	// start subscription period. execute until MaxBillingPeriods is reached
-	for (billingPeriodNum < subscription.Periods.MaxBillingPeriods) {
+	for (subscriptionPeriodNum < subscription.Periods.MaxSubscriptionPeriods) {
 
 		data := EmailInfo{
 				EmailAddress: subscription.EmailInfo.EmailAddress,
@@ -107,7 +107,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		logger.Info("sent content email to " + subscription.EmailInfo.EmailAddress)
 
 		// increment billing period for successful email
-		billingPeriodNum++
+		subscriptionPeriodNum++
 		// Sleep the Workflow until the next subscription email needs to be sent.
 		// This can be set to sleep every month between emails.
 		workflow.Sleep(ctx, duration)

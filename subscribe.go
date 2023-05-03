@@ -11,9 +11,8 @@ type EmailInfo struct {
 
 // Periods contains duration info for trial and billing periods
 type Periods struct {
-	TrialPeriod  time.Duration
-	BillingPeriod time.Duration
-	MaxBillingPeriods int
+	SubcriptionPeriod time.Duration
+	MaxSubscriptionPeriods int
 }
 
 // Subscription is the user email and the campaign they'll receive.
