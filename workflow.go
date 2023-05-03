@@ -42,14 +42,14 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 
 	// Handle any cleanup, including cancellations.
 	defer func() {
-		if !errors.Is(ctx.Err(), workflow.ErrCanceled) {
-			// send welcome email
+		if errors.Is(ctx.Err(), workflow.ErrCanceled) {
+			newCtx, _ := workflow.NewDisconnectedContext(ctx)
 			data := EmailInfo {
 				EmailAddress: subscription.EmailInfo.EmailAddress,
 				Mail:         "Oh my! Looks like your subscription has been canceled!",
 			}
 			// send cancellation email
-			e := workflow.ExecuteActivity(ctx, activities.SendCancellationEmailDuringActiveSubscription, data)
+			e := workflow.ExecuteActivity(newCtx, activities.SendCancellationEmail, data)
 			if err != nil {
 				logger.Error("Failed to send cancel email", "Error", e)
 			} else {
@@ -67,7 +67,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		}
 		logger.Info("Sending unsubscribe email to " + subscription.EmailInfo.EmailAddress)
 		// send the cancelled subscription email
-		err := workflow.ExecuteActivity(newCtx, activities.SendSubscriptionOverEmail, data).Get(newCtx, nil)
+		err := workflow.ExecuteActivity(newCtx, activities.SendSubscriptionEndedEmail, data).Get(newCtx, nil)
 
 		if err != nil {
 			logger.Error("Unable to send unsubscribe message", "Error", err)
@@ -106,11 +106,6 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 
 		logger.Info("sent content email to " + subscription.EmailInfo.EmailAddress)
 
-		err = workflow.ExecuteActivity(ctx, activities.ChargeCustomerForBillingPeriod, data).Get(ctx, nil)
-
-		if err != nil {
-			logger.Error("Failed to charge customer ", "Error", err)
-		}
 		// increment billing period for successful email
 		billingPeriodNum++
 		// Sleep the Workflow until the next subscription email needs to be sent.
