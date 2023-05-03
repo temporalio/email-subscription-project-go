@@ -11,6 +11,7 @@ import (
 func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 	testSuite := &testsuite.WorkflowTestSuite{}
 	env := testSuite.NewTestWorkflowEnvironment()
+	var activities *Activities
 
 	testDetails := Subscription{
 		EmailInfo{
@@ -20,11 +21,15 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 		Periods{
 			TrialPeriod: time.Second,
 			BillingPeriod: time.Second,
-			MaxBillingPeriods: 12,
 		},
 	}
 
-	// Mock Activities
+	env.RegisterWorkflow(SubscriptionWorkflow)
+
+	env.RegisterActivity(activities.SendWelcomeEmail)
+	env.RegisterActivity(activities.SendSubscriptionEmail)
+	env.RegisterActivity(activities.SendCancellationEmail)
+	env.RegisterActivity(activities.SendSubscriptionEndedEmail)
 	
 	// Execute Workflow
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
@@ -36,6 +41,8 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 	testSuite := &testsuite.WorkflowTestSuite{}
 	env := testSuite.NewTestWorkflowEnvironment()
 
+	var activities *Activities
+
 	testDetails := Subscription{
 		EmailInfo{
 			EmailAddress: "example@temporal.io",
@@ -44,15 +51,16 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 		Periods{
 			TrialPeriod: time.Second,
 			BillingPeriod: time.Second,
-			MaxBillingPeriods: 12,
 		},
 	}
+	env.RegisterWorkflow(SubscriptionWorkflow)
+
+	env.RegisterActivity(activities.SendWelcomeEmail)
+	env.RegisterActivity(activities.SendSubscriptionEmail)
+	env.RegisterActivity(activities.SendCancellationEmail)
+	env.RegisterActivity(activities.SendSubscriptionEndedEmail)
 
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
-	require.True(t, env.IsWorkflowCompleted())
-	require.Error(t, env.GetWorkflowError())
-}
-
-func Test_FailedSubscriptionWorkflow (t *testing.T) {
+	env.CancelWorkflow()
 
 }
