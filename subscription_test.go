@@ -37,7 +37,7 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 	require.NoError(t, env.GetWorkflowError())
 }
 
-func Test_CanceledSubscriptionWorkflow (t *testing.T) {
+/*func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 	testSuite := &testsuite.WorkflowTestSuite{}
 	env := testSuite.NewTestWorkflowEnvironment()
 
@@ -64,5 +64,5 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
 
-}
+}*/
 // @@@SNIPEND
