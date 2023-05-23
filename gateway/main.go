@@ -42,6 +42,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 	workflowOptions := client.StartWorkflowOptions{
 		ID:        "subscribe_email_" + email,
 		TaskQueue: taskQueueName,
+		WorkflowExecutionErrorWhenAlreadyStarted: true,
 	}
 
 	// Define the subscription
