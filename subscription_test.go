@@ -15,11 +15,11 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 	var activities *Activities
 
 	testDetails := Subscription{
-		EmailInfo{
+		EmailInfo {
 			EmailAddress: "example@temporal.io",
 			Mail: "",
 		},
-		SubscriptionPeriod: 5 * time.Minute,
+		SubscriptionPeriod: ,
 		MaxSubscriptionPeriods: 12,
 	}
 

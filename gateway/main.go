@@ -15,7 +15,7 @@ import (
 var temporalClient client.Client
 var taskQueueName string
 
-// create the index handler, accessed at localhost:8080
+// create the index handler, accessed at localhost:4000
 func indexHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprint(w, "<h1>Sign up here!")
 	_, _ = fmt.Fprint(w, "<form method='post' action='subscribe'><input required name='email' type='email'><input type='submit' value='Subscribe'>")
@@ -50,7 +50,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 			EmailAddress: email,
 			Mail: "",
 		},
-			SubcriptionPeriod: 5,
+			SubscriptionPeriod: 5,
 			MaxSubscriptionPeriods: 12,
 	}
 
@@ -66,7 +66,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// create unsubscribe handler, accessed at localhost:8080/unsubscribe
+// create unsubscribe handler, accessed at localhost:4000/unsubscribe
 func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 	
 	switch r.Method {
@@ -109,13 +109,13 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// create part of the Query handler, accessed at localhost:8080/getdetails
+// create part of the Query handler, accessed at localhost:4000/getdetails
 func getDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, "<h1>Get description details here!</h1>")
 	_, _ = fmt.Fprint(w, "<form method='get' action='/details'><input required name='email' type='email'><input type='submit' value='GetDetails'>")
 }
 
-// create part of the Query handler that returns information at localhost:8080/details
+// create part of the Query handler that returns information at localhost:4000/details
 func showDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the query string
 	queryValues, err := url.ParseQuery(r.URL.RawQuery)
