@@ -23,16 +23,14 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	var queryResult string
 	// Query handler
 	e := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
-		queryResult = subscription.EmailInfo.EmailAddress + " is on billing period " + strconv.Itoa(subscriptionPeriodNum) + " out of " + strconv.Itoa(subscription.Periods.MaxSubscriptionPeriods)
+		queryResult = subscription.EmailInfo.EmailAddress + " is on billing period " + strconv.Itoa(subscriptionPeriodNum) + " out of " + strconv.Itoa(subscription.MaxSubscriptionPeriods)
  		return queryResult, nil
 	})
 	if e != nil {
 		logger.Info("SetQueryHandler failed: " + e.Error())
 		return e 
 	}
-
-	var err error
-	// set Activity Options. Timeout can be set to a longer timespan (such as a month)
+	// variable for Activity Options. Timeout can be set to a longer timespan (such as a month)
 	ao := workflow.ActivityOptions{
 		StartToCloseTimeout: 10 * time.Minute,
 		WaitForCancellation: true,
@@ -49,7 +47,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 				Mail:         "Oh my! Looks like your subscription has been canceled!",
 			}
 			// send cancellation email
-			e := workflow.ExecuteActivity(newCtx, activities.SendCancellationEmail, data)
+			err := workflow.ExecuteActivity(newCtx, activities.SendCancellationEmail, data)
 			if err != nil {
 				logger.Error("Failed to send cancel email", "Error", e)
 			} else {
@@ -60,7 +58,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		}
 
 		newCtx, _ := workflow.NewDisconnectedContext(ctx)
-		// information for the cancelled subscription email
+		// information for the newly-ended subscription email
 		data := EmailInfo {
 				EmailAddress: subscription.EmailInfo.EmailAddress,
 				Mail: "You have been unsubscribed from the Subscription Workflow. Good bye.",
@@ -77,12 +75,12 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	logger.Info("Sending welcome email to " + subscription.EmailInfo.EmailAddress)
 
 	data := EmailInfo {
-				EmailAddress: subscription.EmailInfo.EmailAddress,
-				Mail:         "Welcome! Looks like you've been signed up!",
-		}
+		EmailAddress: subscription.EmailInfo.EmailAddress,
+		Mail:         "Welcome! Looks like you've been signed up!",
+	}
 			
 	// send welcome email, increment billing period
-	err = workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
+	err := workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
 
 	if err != nil {
 		logger.Error("Failed to send welcome email", "Error", err)
@@ -91,8 +89,7 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 	}
 
 	// start subscription period. execute until MaxBillingPeriods is reached
-	for (subscriptionPeriodNum < subscription.Periods.MaxSubscriptionPeriods) {
-
+	for (subscriptionPeriodNum < subscription.MaxSubscriptionPeriods) {
 		data := EmailInfo{
 				EmailAddress: subscription.EmailInfo.EmailAddress,
 				Mail:         "This is yet another email in the Subscription Workflow.",
@@ -102,17 +99,17 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 
 		if err != nil {
 			logger.Error("Failed to send email ", "Error", err)
+		} else {
+			logger.Info("Sent content email to " + subscription.EmailInfo.EmailAddress)
+			// increment billing period for successful email
+			subscriptionPeriodNum++
+			// Sleep the Workflow until the next subscription email needs to be sent.
+			// This can be set to sleep every month between emails.
+			workflow.Sleep(ctx, duration)
 		}
-
-		logger.Info("sent content email to " + subscription.EmailInfo.EmailAddress)
-
-		// increment billing period for successful email
-		subscriptionPeriodNum++
-		// Sleep the Workflow until the next subscription email needs to be sent.
-		// This can be set to sleep every month between emails.
-		workflow.Sleep(ctx, duration)
+		// return any errors that may have occurred.
+		return err
 	}
-
 	return err
 }
 // @@@SNIPEND

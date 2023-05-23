@@ -19,10 +19,8 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 			EmailAddress: "example@temporal.io",
 			Mail: "",
 		},
-		Periods{
-			SubcriptionPeriod: 5 * time.Minute,
-			MaxSubscriptionPeriods: 12,
-		},
+		SubscriptionPeriod: 5 * time.Minute,
+		MaxSubscriptionPeriods: 12,
 	}
 
 	env.RegisterWorkflow(SubscriptionWorkflow)
