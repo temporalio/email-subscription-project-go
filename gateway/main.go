@@ -50,10 +50,8 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 			EmailAddress: email,
 			Mail: "",
 		},
-		Periods: subscribe_emails.Periods{
 			SubcriptionPeriod: 5,
 			MaxSubscriptionPeriods: 12,
-		},
 	}
 
 	// Execute the Temporal Workflow to start the subscription.
@@ -135,13 +133,13 @@ func showDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	// print email, billing period, charge, etc.
 	resp, err := temporalClient.QueryWorkflow(context.Background(), workflowID, "", queryType)
 	if err != nil {
-		log.Fatalln("Unable to query workflow", err)
+		log.Fatalln("Unable to Query Workflow", err)
 	}
 	var result string
 	if err := resp.Get(&result); err != nil {
-		log.Fatalln("Unable to decode query result", err)
+		log.Fatalln("Unable to decode Query result", err)
 	}
-	log.Println("Received query result", "Result: " + result)
+	log.Println("Received Query result", "Result: " + result)
 	fmt.Fprint(w, "Your details have been retrieved. Results: " + result)
 }
 // set up handlers, Client, port, Task Queue name.
