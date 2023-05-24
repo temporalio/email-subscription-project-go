@@ -34,5 +34,4 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
 	require.NoError(t, env.GetWorkflowError())
 }
-
 // @@@SNIPEND
