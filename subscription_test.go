@@ -19,7 +19,7 @@ func Test_SuccessfulSubscriptionWorkflow (t *testing.T) {
 			EmailAddress: "example@temporal.io",
 			Mail: "",
 		},
-		SubscriptionPeriod: ,
+		SubscriptionPeriod: 5 * time.Hour,
 		MaxSubscriptionPeriods: 12,
 	}
 
