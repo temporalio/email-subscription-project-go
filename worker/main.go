@@ -25,11 +25,11 @@ func main() {
 	w.RegisterWorkflow(subscribe_emails.SubscriptionWorkflow)
 	w.RegisterActivity(&subscribe_emails.Activities{})
 
+	log.Println("Worker is starting.")
 	// Listen to Task Queue
 	err = w.Run(worker.InterruptCh())
 	if err != nil {
 		log.Fatalln("Unable to start Worker.", err)
 	}
-	log.Println("Worker successfully started.")
 }
 // @@@SNIPEND

@@ -3,9 +3,10 @@ package subscribe_emails
 
 import (
 	"errors"
-	"strconv"
+	"fmt"
 	"time"
 
+	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -13,57 +14,58 @@ import (
 func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error {
 	// declare variables, duration, and logger
 	var activities *Activities
-	subscriptionPeriodNum := 0
+	subscriptionPeriod := 0
 	// duration can be set up to a month.
-	duration := time.Minute
+	duration := 10 * 24 * time.Hour
 
 	logger := workflow.GetLogger(ctx)
-	logger.Info("Subscription created for " + subscription.EmailInfo.EmailAddress)
-	// Query result to be returned
-	var queryResult string
+	logger.Info("Subscription created", "EmailAddress", subscription.EmailInfo.EmailAddress)
 	// Query handler
-	e := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
-		queryResult = subscription.EmailInfo.EmailAddress + " is on billing period " + strconv.Itoa(subscriptionPeriodNum) + " out of " + strconv.Itoa(subscription.MaxSubscriptionPeriods)
- 		return queryResult, nil
+	err := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
+		return fmt.Sprintf("%v is on billing period %v out of %v",
+			subscription.EmailInfo.EmailAddress,
+			subscriptionPeriod,
+			subscription.MaxSubscriptionPeriods), nil
 	})
-	if e != nil {
-		logger.Info("SetQueryHandler failed: " + e.Error())
-		return e 
+	if err != nil {
+		return err
 	}
 	// variable for Activity Options. Timeout can be set to a longer timespan (such as a month)
-	ao := workflow.ActivityOptions{
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 10 * time.Minute,
 		WaitForCancellation: true,
-	}
-
-	ctx = workflow.WithActivityOptions(ctx, ao)
+		RetryPolicy: &temporal.RetryPolicy{
+			InitialInterval: 2 * time.Hour,
+			MaximumAttempts: 5,
+		},
+	})
 
 	// Handle any cleanup, including cancellations.
 	defer func() {
+		newCtx, cancel := workflow.NewDisconnectedContext(ctx)
+		defer cancel()
+
 		if errors.Is(ctx.Err(), workflow.ErrCanceled) {
-			newCtx, _ := workflow.NewDisconnectedContext(ctx)
-			data := EmailInfo {
+			data := EmailInfo{
 				EmailAddress: subscription.EmailInfo.EmailAddress,
 				Mail:         "Oh my! Looks like your subscription has been canceled!",
 			}
 			// send cancellation email
 			err := workflow.ExecuteActivity(newCtx, activities.SendCancellationEmail, data)
 			if err != nil {
-				logger.Error("Failed to send cancel email", "Error", e)
+				logger.Error("Failed to send cancel email", "Error", err)
 			} else {
 				// Cancellation received, which will trigger an unsubscribe email.
-				logger.Info("Sending cancellation email")
+				logger.Info("Sent cancellation email")
 			}
-			return
 		}
 
-		newCtx, _ := workflow.NewDisconnectedContext(ctx)
 		// information for the newly-ended subscription email
-		data := EmailInfo {
-				EmailAddress: subscription.EmailInfo.EmailAddress,
-				Mail: "You have been unsubscribed from the Subscription Workflow. Good bye.",
+		data := EmailInfo{
+			EmailAddress: subscription.EmailInfo.EmailAddress,
+			Mail:         "You have been unsubscribed from the Subscription Workflow. Good bye.",
 		}
-		logger.Info("Sending unsubscribe email to " + subscription.EmailInfo.EmailAddress)
+		logger.Info("Sending unsubscribe email", "EmailAddress", subscription.EmailInfo.EmailAddress)
 		// send the cancelled subscription email
 		err := workflow.ExecuteActivity(newCtx, activities.SendSubscriptionEndedEmail, data).Get(newCtx, nil)
 
@@ -72,45 +74,38 @@ func SubscriptionWorkflow(ctx workflow.Context, subscription Subscription) error
 		}
 	}()
 	// handling for the first email ever
-	logger.Info("Sending welcome email to " + subscription.EmailInfo.EmailAddress)
+	logger.Info("Sending welcome email", "EmailAddress", subscription.EmailInfo.EmailAddress)
 
-	data := EmailInfo {
+	data := EmailInfo{
 		EmailAddress: subscription.EmailInfo.EmailAddress,
 		Mail:         "Welcome! Looks like you've been signed up!",
 	}
-			
-	// send welcome email, increment billing period
-	err := workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
 
+	// send welcome email, increment billing period
+	// send welcome email, increment billing period
+	err = workflow.ExecuteActivity(ctx, activities.SendWelcomeEmail, data).Get(ctx, nil)
 	if err != nil {
-		logger.Error("Failed to send welcome email", "Error", err)
-	} else {
-		subscriptionPeriodNum++
+		return err
 	}
 
 	// start subscription period. execute until MaxBillingPeriods is reached
-	for (subscriptionPeriodNum < subscription.MaxSubscriptionPeriods) {
+	for ; subscriptionPeriod < subscription.MaxSubscriptionPeriods; subscriptionPeriod++ {
 		data := EmailInfo{
-				EmailAddress: subscription.EmailInfo.EmailAddress,
-				Mail:         "This is yet another email in the Subscription Workflow.",
+			EmailAddress: subscription.EmailInfo.EmailAddress,
+			Mail:         "This is yet another email in the Subscription Workflow.",
 		}
 
 		err = workflow.ExecuteActivity(ctx, activities.SendSubscriptionEmail, data).Get(ctx, nil)
-
 		if err != nil {
-			logger.Error("Failed to send email ", "Error", err)
-		} else {
-			logger.Info("Sent content email to " + subscription.EmailInfo.EmailAddress)
-			// increment billing period for successful email
-			subscriptionPeriodNum++
-			// Sleep the Workflow until the next subscription email needs to be sent.
-			// This can be set to sleep every month between emails.
-			workflow.Sleep(ctx, duration)
+			return err
 		}
-		// return any errors that may have occurred.
-		return err
+		logger.Info("Sent content email", "EmailAddress", subscription.EmailInfo.EmailAddress)
+		// Sleep the Workflow until the next subscription email needs to be sent.
+		// This can be set to sleep every month between emails.
+		if err = workflow.Sleep(ctx, duration); err != nil {
+			return err
+		}
 	}
-	return err
+	return nil
 }
 // @@@SNIPEND
-
