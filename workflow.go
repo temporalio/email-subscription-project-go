@@ -13,7 +13,7 @@ import (
 // Workflow definition
 func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error {
 	subscriptionPeriodCount := emailDetails.SubscriptionCount
-	duration := 15 * time.Second
+	duration := 5 * time.Second
 	logger := workflow.GetLogger(ctx)
 	logger.Info("Subscription created for: ", emailDetails.EmailAddress)
 	// Query handler
