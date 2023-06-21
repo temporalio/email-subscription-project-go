@@ -20,10 +20,10 @@ func main() {
 	}
 	defer c.Close()
 	// create Worker
-	w := worker.New(c, "subscription_emails", worker.Options{})
+	w := worker.New(c, subscribe_emails.TaskQueueName, worker.Options{})
 	// register Activity and Workflow
 	w.RegisterWorkflow(subscribe_emails.SubscriptionWorkflow)
-	w.RegisterActivity(&subscribe_emails.Activities{})
+	w.RegisterActivity(subscribe_emails.SendEmail)
 
 	log.Println("Worker is starting.")
 	// Listen to Task Queue
