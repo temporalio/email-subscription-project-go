@@ -1,4 +1,4 @@
-module subscribe_emails
+module subscribeemails
 
 go 1.19
 

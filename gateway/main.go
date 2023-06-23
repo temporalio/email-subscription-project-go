@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"subscribe_emails"
+	"subscribeemails"
 
 	"go.temporal.io/sdk/client"
 )
@@ -40,21 +40,20 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 	// use the email as the id in the workflow.
 	workflowOptions := client.StartWorkflowOptions{
 		ID:        email,
-		TaskQueue: subscribe_emails.TaskQueueName,
+		TaskQueue: subscribeemails.TaskQueueName,
 		WorkflowExecutionErrorWhenAlreadyStarted: true,
 	}
 
 	// Define the EmailDetails struct
-	subscription := subscribe_emails.EmailDetails {
+	subscription := subscribeemails.EmailDetails {
 		EmailAddress: email,
 		Message: "Welcome to the Subscription Workflow!",
-		IsSubscribed: true,
 		SubscriptionCount: 0,
 		MaxSubscriptionPeriods: 12,
 	}
 
 	// Execute the Temporal Workflow to start the subscription.
-	_, err = temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, subscribe_emails.SubscriptionWorkflow, subscription)
+	_, err = temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, subscribeemails.SubscriptionWorkflow, subscription)
 
 	if err != nil {
 		_, _ = fmt.Fprint(w, "<h1>Couldn't sign up user. Please try again.</h1>")
@@ -151,7 +150,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("Starting the web server on %s\n", subscribe_emails.ClientHostPort)
+	fmt.Printf("Starting the web server on %s\n", subscribeemails.ClientHostPort)
 
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/subscribe", subscribeHandler)

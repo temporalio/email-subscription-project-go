@@ -1,5 +1,5 @@
 // @@@SNIPSTART subscription-workflow-go-subscribe-test
-package subscribe_emails
+package subscribeemails
 
 import (
 	"testing"

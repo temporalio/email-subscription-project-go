@@ -1,14 +1,15 @@
 // @@@SNIPSTART subscription-workflow-go-subscribe
-package subscribe_emails
+package subscribeemails
 
-var TaskQueueName string = "email_subscription"
-var ClientHostPort string = "localhost:4000"
+const TaskQueueName string = "email_subscription"
+const ClientHostPort string = "localhost:4000"
 
 type EmailDetails struct {
-	EmailAddress string
-	Message string
-	IsSubscribed bool
+	EmailAddress           string
+	Message                string
+	IsSubscribed           bool
 	MaxSubscriptionPeriods int
-	SubscriptionCount int
+	SubscriptionCount      int
 }
+
 // @@@SNIPEND

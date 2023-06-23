@@ -1,16 +1,16 @@
 // @@@SNIPSTART subscription-workflow-go-activities
-package subscribe_emails
+package subscribeemails
 
 import (
 	"context"
-	"fmt"
 
 	"go.temporal.io/sdk/activity"
 )
 
 // email activities
 func SendEmail(ctx context.Context, emailInfo EmailDetails) (string, error) {
-	activity.GetLogger(ctx).Info("Sending email to the following customer: %v", emailInfo.EmailAddress)
-	return fmt.Sprintf("Sent email %v out of %v to: %v", emailInfo.SubscriptionCount, emailInfo.MaxSubscriptionPeriods, emailInfo.EmailAddress), nil
+	activity.GetLogger(ctx).Info("Sending email to customer","EmailAddress", emailInfo.EmailAddress)
+	return "Email sent to " + emailInfo.EmailAddress, nil
 }
+
 // @@@SNIPEND
