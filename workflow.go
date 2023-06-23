@@ -17,7 +17,7 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	logger := workflow.GetLogger(ctx)
 	logger.Info("Subscription created", "EmailAddress", emailDetails.EmailAddress)
 	// Query handler
-	err := workflow.SetQueryHandler(ctx, "GetDetails", func(input []byte) (string, error) {
+	err := workflow.SetQueryHandler(ctx, "GetDetails", func() (string, error) {
 		return fmt.Sprintf("%v is on subscription period %v out of %v",
 			emailDetails.EmailAddress,
 			emailDetails.SubscriptionCount,
