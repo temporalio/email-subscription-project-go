@@ -41,7 +41,7 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 		newCtx, cancel := workflow.NewDisconnectedContext(ctx)
 		defer cancel()
 
-		if errors.Is(ctx.Err(), workflow.ErrCanceled) || !emailDetails.IsSubscribed{
+		if errors.Is(ctx.Err(), workflow.ErrCanceled) && !emailDetails.IsSubscribed {
 			data := EmailDetails{
 				EmailAddress:           emailDetails.EmailAddress,
 				Message:                "Your subscription has been canceled. Sorry to see you go!",
@@ -50,11 +50,11 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 				MaxSubscriptionPeriods: emailDetails.MaxSubscriptionPeriods,
 			}
 			// send cancellation email
-			err := workflow.ExecuteActivity(newCtx, SendEmail, data)
+			err := workflow.ExecuteActivity(newCtx, SendEmail, data).Get(newCtx, nil)
 			if err != nil {
 				logger.Error("Failed to send cancellation email", "Error", err)
 			} else {
-				// Cancellation received, which will trigger an unsubscribe email.
+				// Cancellation received.
 				logger.Info("Sent cancellation email", "EmailAddress", emailDetails.EmailAddress)
 			}
 		}
@@ -101,7 +101,7 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 		data := EmailDetails{
 			EmailAddress:           emailDetails.EmailAddress,
 			Message:                "This is yet another email in the Subscription Workflow.",
-			IsSubscribed:           emailDetails.IsSubscribed,
+			IsSubscribed:           true,
 			MaxSubscriptionPeriods: emailDetails.MaxSubscriptionPeriods,
 			SubscriptionCount:      emailDetails.SubscriptionCount,
 		}

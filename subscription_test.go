@@ -43,8 +43,9 @@ func Test_CanceledSubscriptionWorkflow (t *testing.T) {
 	env.RegisterWorkflow(SubscriptionWorkflow)
 	env.RegisterActivity(SendEmail)
 	
-	// Execute Workflow
+	// Execute and cancel Workflow
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
+	env.CancelWorkflow()
 
 }
 
