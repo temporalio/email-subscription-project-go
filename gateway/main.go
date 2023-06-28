@@ -71,9 +71,9 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 	case "GET":
 		// create input field for the email
-		_, _ = fmt.Fprint(w, "<h1>Unsubscribe</h1><form method='post' action='/unsubscribe'><input required name='email' type='email'><input type='submit' value='Unsubscribe'>")
+		_, _ = fmt.Fprint(w, "<h1>Unsubscribe</h1><form method='delete' action='/unsubscribe'><input required name='email' type='email'><input type='submit' value='Unsubscribe'>")
 
-	case "POST":
+	case "DELETE":
 		// check value in input field
 		err := r.ParseForm()
 
