@@ -5,10 +5,10 @@ const TaskQueueName string = "email_subscription"
 const ClientHostPort string = "localhost:4000"
 
 type EmailDetails struct {
-	EmailAddress           string
-	Message                string
-	IsSubscribed           bool
-	SubscriptionCount      int
+	EmailAddress      string
+	Message           string
+	IsSubscribed      bool
+	SubscriptionCount int
 }
 
 // @@@SNIPEND

@@ -19,7 +19,7 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	err := workflow.SetQueryHandler(ctx, "GetDetails", func() (string, error) {
 		return fmt.Sprintf("%v is on email #%v ",
 			emailDetails.EmailAddress,
-			emailDetails.SubscriptionCount,), nil
+			emailDetails.SubscriptionCount), nil
 	})
 	if err != nil {
 		return err
@@ -37,10 +37,10 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 
 		if errors.Is(ctx.Err(), workflow.ErrCanceled) {
 			data := EmailDetails{
-				EmailAddress:           emailDetails.EmailAddress,
-				Message:                "Your subscription has been canceled. Sorry to see you go!",
-				IsSubscribed:           false,
-				SubscriptionCount:      emailDetails.SubscriptionCount,
+				EmailAddress:      emailDetails.EmailAddress,
+				Message:           "Your subscription has been canceled. Sorry to see you go!",
+				IsSubscribed:      false,
+				SubscriptionCount: emailDetails.SubscriptionCount,
 			}
 			// send cancellation email
 			err := workflow.ExecuteActivity(newCtx, SendEmail, data).Get(newCtx, nil)
@@ -57,10 +57,10 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	logger.Info("Sending welcome email", "EmailAddress", emailDetails.EmailAddress)
 	emailDetails.SubscriptionCount++
 	data := EmailDetails{
-		EmailAddress:           emailDetails.EmailAddress,
-		Message:                "Welcome! Looks like you've been signed up!",
-		IsSubscribed:           true,
-		SubscriptionCount:      emailDetails.SubscriptionCount,
+		EmailAddress:      emailDetails.EmailAddress,
+		Message:           "Welcome! Looks like you've been signed up!",
+		IsSubscribed:      true,
+		SubscriptionCount: emailDetails.SubscriptionCount,
 	}
 
 	// send welcome email, increment billing period
@@ -73,10 +73,10 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	for emailDetails.IsSubscribed {
 		emailDetails.SubscriptionCount++
 		data := EmailDetails{
-			EmailAddress:           emailDetails.EmailAddress,
-			Message:                "This is yet another email in the Subscription Workflow.",
-			IsSubscribed:           true,
-			SubscriptionCount:      emailDetails.SubscriptionCount,
+			EmailAddress:      emailDetails.EmailAddress,
+			Message:           "This is yet another email in the Subscription Workflow.",
+			IsSubscribed:      true,
+			SubscriptionCount: emailDetails.SubscriptionCount,
 		}
 
 		err = workflow.ExecuteActivity(ctx, SendEmail, data).Get(ctx, nil)

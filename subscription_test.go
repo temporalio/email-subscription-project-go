@@ -12,10 +12,10 @@ func Test_CanceledSubscriptionWorkflow(t *testing.T) {
 	env := testSuite.NewTestWorkflowEnvironment()
 
 	testDetails := EmailDetails{
-		EmailAddress:           "example@temporal.io",
-		Message:                "This is a test to see if the Workflow cancels. This is dependent on the bool variable in the testDetails struct.",
-		IsSubscribed:           false,
-		SubscriptionCount:      4,
+		EmailAddress:      "example@temporal.io",
+		Message:           "This is a test to see if the Workflow cancels. This is dependent on the bool variable in the testDetails struct.",
+		IsSubscribed:      false,
+		SubscriptionCount: 4,
 	}
 
 	env.RegisterWorkflow(SubscriptionWorkflow)
