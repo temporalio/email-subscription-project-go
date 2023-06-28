@@ -3,7 +3,7 @@ package main
 
 import (
 	"log"
-	"subscribe_emails"
+	"subscribeemails"
 
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -20,10 +20,10 @@ func main() {
 	}
 	defer c.Close()
 	// create Worker
-	w := worker.New(c, "subscription_emails", worker.Options{})
+	w := worker.New(c, subscribeemails.TaskQueueName, worker.Options{})
 	// register Activity and Workflow
-	w.RegisterWorkflow(subscribe_emails.SubscriptionWorkflow)
-	w.RegisterActivity(&subscribe_emails.Activities{})
+	w.RegisterWorkflow(subscribeemails.SubscriptionWorkflow)
+	w.RegisterActivity(subscribeemails.SendEmail)
 
 	log.Println("Worker is starting.")
 	// Listen to Task Queue

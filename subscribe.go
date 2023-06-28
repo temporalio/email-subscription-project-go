@@ -1,18 +1,15 @@
 // @@@SNIPSTART subscription-workflow-go-subscribe
-package subscribe_emails
+package subscribeemails
 
-import "time"
+const TaskQueueName string = "email_subscription"
+const ClientHostPort string = "localhost:4000"
 
-// EmailInfo is the data that the SendContentEmail uses to send the message.
-type EmailInfo struct {
-	EmailAddress string
-	Mail string
-}
-
-// Subscription is the user email and duration information.
-type Subscription struct {
-	EmailInfo    EmailInfo
-	SubscriptionPeriod time.Duration
+type EmailDetails struct {
+	EmailAddress           string
+	Message                string
+	IsSubscribed           bool
 	MaxSubscriptionPeriods int
+	SubscriptionCount      int
 }
+
 // @@@SNIPEND
