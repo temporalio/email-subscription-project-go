@@ -49,7 +49,7 @@ func subscribeHandler(w http.ResponseWriter, r *http.Request) {
 		EmailAddress: email,
 		Message: "Welcome to the Subscription Workflow!",
 		SubscriptionCount: 0,
-		MaxSubscriptionPeriods: 12,
+		IsSubscribed: true,
 	}
 
 	// Execute the Temporal Workflow to start the subscription.

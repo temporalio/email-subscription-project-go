@@ -9,7 +9,7 @@ import (
 
 // email activities
 func SendEmail(ctx context.Context, emailInfo EmailDetails) (string, error) {
-	activity.GetLogger(ctx).Info("Sending email to customer","EmailAddress", emailInfo.EmailAddress)
+	activity.GetLogger(ctx).Info("Sending email to customer", "EmailAddress", emailInfo.EmailAddress)
 	return "Email sent to " + emailInfo.EmailAddress, nil
 }
 

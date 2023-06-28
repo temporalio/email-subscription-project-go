@@ -16,3 +16,5 @@ Once this is working, follow the directions provided.
 3. Open another terminal and enter `go run worker/main.go`
 
 If successful, you should see output for a mock welcome email.
+
+<!-- TODO: add curl commands -->

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -18,10 +17,9 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	logger.Info("Subscription created", "EmailAddress", emailDetails.EmailAddress)
 	// Query handler
 	err := workflow.SetQueryHandler(ctx, "GetDetails", func() (string, error) {
-		return fmt.Sprintf("%v is on subscription period %v out of %v",
+		return fmt.Sprintf("%v is on email #%v ",
 			emailDetails.EmailAddress,
-			emailDetails.SubscriptionCount,
-			emailDetails.MaxSubscriptionPeriods), nil
+			emailDetails.SubscriptionCount,), nil
 	})
 	if err != nil {
 		return err
@@ -30,10 +28,6 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 2 * time.Minute,
 		WaitForCancellation: true,
-		RetryPolicy: &temporal.RetryPolicy{
-			InitialInterval: 2 * time.Hour,
-			MaximumAttempts: 5,
-		},
 	})
 
 	// Handle any cleanup, including cancellations.
@@ -41,13 +35,12 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 		newCtx, cancel := workflow.NewDisconnectedContext(ctx)
 		defer cancel()
 
-		if errors.Is(ctx.Err(), workflow.ErrCanceled) && !emailDetails.IsSubscribed {
+		if errors.Is(ctx.Err(), workflow.ErrCanceled) {
 			data := EmailDetails{
 				EmailAddress:           emailDetails.EmailAddress,
 				Message:                "Your subscription has been canceled. Sorry to see you go!",
 				IsSubscribed:           false,
 				SubscriptionCount:      emailDetails.SubscriptionCount,
-				MaxSubscriptionPeriods: emailDetails.MaxSubscriptionPeriods,
 			}
 			// send cancellation email
 			err := workflow.ExecuteActivity(newCtx, SendEmail, data).Get(newCtx, nil)
@@ -56,24 +49,6 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 			} else {
 				// Cancellation received.
 				logger.Info("Sent cancellation email", "EmailAddress", emailDetails.EmailAddress)
-			}
-		}
-
-		// information for the newly-ended subscription email
-		if emailDetails.MaxSubscriptionPeriods == emailDetails.SubscriptionCount {
-			data := EmailDetails{
-				EmailAddress:           emailDetails.EmailAddress,
-				Message:                "You have been unsubscribed from the Subscription Workflow. Goodbye.",
-				IsSubscribed:           false,
-				MaxSubscriptionPeriods: emailDetails.MaxSubscriptionPeriods,
-				SubscriptionCount:      emailDetails.SubscriptionCount,
-			}
-			logger.Info("Sending unsubscribe email", "EmailAddress", emailDetails.EmailAddress)
-			// send the cancelled subscription email
-			err := workflow.ExecuteActivity(newCtx, SendEmail, data).Get(newCtx, nil)
-
-			if err != nil {
-				logger.Error("Unable to send unsubscribe message", "Error", err)
 			}
 		}
 	}()
@@ -85,7 +60,6 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 		EmailAddress:           emailDetails.EmailAddress,
 		Message:                "Welcome! Looks like you've been signed up!",
 		IsSubscribed:           true,
-		MaxSubscriptionPeriods: emailDetails.MaxSubscriptionPeriods,
 		SubscriptionCount:      emailDetails.SubscriptionCount,
 	}
 
@@ -95,14 +69,13 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 		return err
 	}
 
-	// start subscription period. execute until MaxBillingPeriods is reached
-	for emailDetails.SubscriptionCount < emailDetails.MaxSubscriptionPeriods {
+	// start subscription period. execute until no longer subscribed
+	for emailDetails.IsSubscribed {
 		emailDetails.SubscriptionCount++
 		data := EmailDetails{
 			EmailAddress:           emailDetails.EmailAddress,
 			Message:                "This is yet another email in the Subscription Workflow.",
 			IsSubscribed:           true,
-			MaxSubscriptionPeriods: emailDetails.MaxSubscriptionPeriods,
 			SubscriptionCount:      emailDetails.SubscriptionCount,
 		}
 

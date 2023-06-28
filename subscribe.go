@@ -8,7 +8,6 @@ type EmailDetails struct {
 	EmailAddress           string
 	Message                string
 	IsSubscribed           bool
-	MaxSubscriptionPeriods int
 	SubscriptionCount      int
 }
 
