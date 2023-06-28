@@ -26,4 +26,5 @@ func Test_CanceledSubscriptionWorkflow(t *testing.T) {
 	env.CancelWorkflow()
 
 }
+
 // @@@SNIPEND

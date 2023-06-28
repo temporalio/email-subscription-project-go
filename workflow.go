@@ -1,4 +1,4 @@
-// @@@SNIPSTART subscription-workflow-go-workflow
+// @@@SNIPSTART subscription-workflow-go-main
 package subscribeemails
 
 import (
