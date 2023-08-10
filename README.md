@@ -15,6 +15,29 @@ Once this is working, follow the directions provided.
 2. Enter `go run gateway/main.go` into a new terminal window.
 3. Open another terminal and enter `go run worker/main.go`
 
-If successful, you should see output for a mock welcome email.
+## Curl commands
 
-<!-- TODO: add curl commands -->
+### subscribe
+
+Use the curl command to send a POST request to `http://localhost:5000/subscribe` with the email address as a JSON payload.
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"email": "example@example.com"}' http://localhost:4000/subscribe
+```
+
+### get-details
+
+The email address should be included in the query string parameter of the URL.
+
+```bash
+curl -X GET -H "Content-Type: application/json" http://localhost:4000/details?email=example@example.com
+
+```
+
+### Unsubscribe
+
+Send a `DELETE` request with the email address in a JSON payload:
+
+```bash
+curl -X DELETE -H "Content-Type: application/json" -d '{"email": "example@example.com"}' http://localhost:4000/unsubscribe
+```
