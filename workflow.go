@@ -3,7 +3,6 @@ package subscribeemails
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"go.temporal.io/sdk/workflow"
@@ -14,12 +13,12 @@ func SubscriptionWorkflow(ctx workflow.Context, emailDetails EmailDetails) error
 	duration := 12 * time.Second
 	logger := workflow.GetLogger(ctx)
 	logger.Info("Subscription created", "EmailAddress", emailDetails.EmailAddress)
+
 	// Query handler
-	err := workflow.SetQueryHandler(ctx, "GetDetails", func() (string, error) {
-		return fmt.Sprintf("%v is on email #%v ",
-			emailDetails.EmailAddress,
-			emailDetails.SubscriptionCount), nil
+	err := workflow.SetQueryHandler(ctx, "GetDetails", func() (EmailDetails, error) {
+		return emailDetails, nil
 	})
+
 	if err != nil {
 		return err
 	}
