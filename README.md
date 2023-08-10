@@ -30,7 +30,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"email": "example@example.
 The email address should be included in the query string parameter of the URL.
 
 ```bash
-curl -X GET -H "Content-Type: application/json" http://localhost:4000/get_details?email=example@example.com
+curl -X GET -H "Content-Type: application/json" http://localhost:4000/details?email=example@example.com
 
 ```
 
