@@ -3,6 +3,7 @@ package subscribeemails
 
 import (
 	"testing"
+	"time"
 
 	"go.temporal.io/sdk/testsuite"
 )
@@ -14,17 +15,22 @@ func Test_CanceledSubscriptionWorkflow(t *testing.T) {
 	testDetails := EmailDetails{
 		EmailAddress:      "example@temporal.io",
 		Message:           "This is a test to see if the Workflow cancels. This is dependent on the bool variable in the testDetails struct.",
-		IsSubscribed:      false,
-		SubscriptionCount: 4,
+		IsSubscribed:      true,
+		SubscriptionCount: 12,
 	}
+
+	// set delayed callback to allow time for cancellation.
+	env.RegisterDelayedCallback(func() {
+		env.CancelWorkflow()
+	}, 5 * time.Second)
 
 	env.RegisterWorkflow(SubscriptionWorkflow)
 	env.RegisterActivity(SendEmail)
 
-	// Execute and cancel Workflow
 	env.ExecuteWorkflow(SubscriptionWorkflow, testDetails)
-	env.CancelWorkflow()
-
 }
+
+
+
 
 // @@@SNIPEND
