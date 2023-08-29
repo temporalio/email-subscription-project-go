@@ -142,7 +142,7 @@ func unsubscribeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// send headers
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated) // 201 Created status code
+	w.WriteHeader(http.StatusAccepted) // 202 Accepted status code
 
 	// send response
 	if err := json.NewEncoder(w).Encode(responseData); err != nil {
